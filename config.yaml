@@ -1,0 +1,151 @@
+# LPI Radar Waveform Design Configuration
+# ===========================================
+# Single configuration file with different execution modes
+
+# Execution Mode Selection
+execution_mode: "quick"  # Options: "quick", "full", "custom"
+
+# Execution Modes (different parameter sets)
+modes:
+  quick:
+    signal:
+      sequence_length: 64
+      mainlobe_width: 3
+    optimization:
+      gradient:
+        learning_rate: 0.02
+        max_iterations: 200
+        convergence_threshold: 0.00001
+        enable_early_stopping: true
+      genetic_algorithm:
+        population_size: 30
+        max_generations: 100
+        mutation_rate: 0.15
+        crossover_rate: 0.9
+        tournament_size: 2
+        mutation_magnitude: 0.3
+        elitism_ratio: 0.2
+    experiment:
+      lambda_values: [0.0, 0.5, 1.0, 2.0]
+    logging:
+      level: "INFO"
+      log_interval: 25
+    output:
+      plot_dpi: 300
+      figure_sizes:
+        main_comparison: [10, 4]
+        performance_summary: [10, 4] 
+        spectrum_analysis: [12, 4]
+
+  full:
+    signal:
+      sequence_length: 256
+      mainlobe_width: 3
+    optimization:
+      gradient:
+        learning_rate: 0.01
+        max_iterations: 2000
+        convergence_threshold: 0.0000000001
+        enable_early_stopping: false  # Disabled for fair comparison plots
+      genetic_algorithm:
+        population_size: 50
+        max_generations: 300
+        mutation_rate: 0.1
+        crossover_rate: 0.8
+        tournament_size: 3
+        mutation_magnitude: 0.25
+        elitism_ratio: 0.1
+    experiment:
+      lambda_values: [0.0, 0.25, 0.5, 1.0, 2.0]
+    logging:
+      level: "INFO"
+      log_interval: 50
+    output:
+      plot_dpi: 300
+      figure_sizes:
+        main_comparison: [12, 5]
+        performance_summary: [12, 5] 
+        spectrum_analysis: [15, 5]
+
+# Default/Custom Parameters (used when execution_mode: "custom")
+# These are also fallback values for any missing parameters in modes
+signal:
+  sequence_length: 64           # N - radar sequence length
+  mainlobe_width: 3            # Width for PSL computation (samples)
+  
+# Optimization Algorithm Parameters
+optimization:
+  gradient:
+    learning_rate: 0.01        # Adam optimizer learning rate
+    max_iterations: 1000       # Maximum optimization iterations
+    convergence_threshold: 0.000001 # Early stopping threshold
+    enable_early_stopping: true # Enable/disable early stopping
+    
+  genetic_algorithm:
+    population_size: 50        # GA population size
+    max_generations: 100       # Maximum GA generations
+    mutation_rate: 0.1         # Probability of mutation
+    crossover_rate: 0.8        # Probability of crossover
+    tournament_size: 3         # Tournament selection size
+    mutation_magnitude: 0.25   # Mutation step size (radians)
+    elitism_ratio: 0.1         # Fraction of best individuals to preserve
+
+# Loss Function Parameters (Example: PSL-LPI optimization)
+loss:
+  lpi_weight: 0.5             # Example: LPI vs PSL weight (customize for other metrics)
+  lpi_scale_factor: 2000      # Example: Scaling for LPI (adapt for other objectives)
+  numerical_epsilon: 0.0000000001  # Small value for numerical stability
+
+# Experiment Configuration
+experiment:
+  # Pareto frontier sweep
+  lambda_values: [0.0, 0.25, 0.5, 1.0, 2.0]  # LPI weights to test
+  
+  # Test configurations
+  sequence_lengths: [32, 64, 128, 256]  # Different N values to test
+
+# Computational Parameters
+compute:
+  device: "auto"              # "cpu", "cuda", or "auto"
+  random_seed: 42             # For reproducibility
+  
+# Output Configuration
+output:
+  save_plots: true
+  plot_format: "png"
+  plot_dpi: 300
+  results_dir: "results"      # Directory to save outputs
+  
+  # Plot parameters
+  figure_sizes:
+    main_comparison: [12, 5]
+    performance_summary: [12, 5] 
+    spectrum_analysis: [15, 5]
+  
+  # Display parameters
+  lpi_display_scale: 1000     # Scale factor for LPI display (×10³)
+  bar_width: 0.35             # Width for grouped bar charts
+  
+# Logging Configuration
+logging:
+  level: "INFO"               # DEBUG, INFO, WARNING, ERROR
+  log_interval: 50            # Print progress every N iterations/generations
+  save_convergence_history: true
+  
+# Advanced Parameters (for fine-tuning)
+advanced:
+  # Gradient optimization
+  gradient_clip_norm: 1.0     # Gradient clipping threshold
+  scheduler:
+    enabled: false
+    type: "StepLR"            # Learning rate scheduler
+    step_size: 200
+    gamma: 0.8
+    
+  # GA parameters
+  diversity_pressure: 0.1     # Encourage population diversity
+  adaptive_mutation: false    # Adapt mutation rate during evolution
+  
+  # Numerical stability
+  phase_constraint: true      # Keep phases in [0, 2π]
+  normalization_method: "max" # "max" or "sum" for ambiguity function 

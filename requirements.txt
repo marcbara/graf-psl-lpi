@@ -1,0 +1,16 @@
+# Core dependencies for LPI Radar Waveform Design
+torch>=1.12.0
+numpy>=1.21.0
+matplotlib>=3.5.0
+PyYAML>=6.0
+
+# Optional but recommended for enhanced functionality
+scipy>=1.8.0          # For additional signal processing functions
+tqdm>=4.64.0          # For progress bars in long experiments
+seaborn>=0.11.0       # For enhanced plotting aesthetics
+
+# Development and testing (optional)
+pytest>=7.0.0         # For unit testing
+jupyter>=1.0.0        # For notebook experiments
+black>=22.0.0         # For code formatting
+mypy>=0.950           # For type checking 
