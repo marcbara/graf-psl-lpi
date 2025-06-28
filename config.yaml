@@ -3,7 +3,7 @@
 # Single configuration file with different execution modes
 
 # Execution Mode Selection
-execution_mode: "quick"  # Options: "quick", "full", "custom"
+execution_mode: "full"  # Options: "quick", "full", "custom"
 
 # Execution Modes (different parameter sets)
 modes:

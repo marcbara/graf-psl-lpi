@@ -27,10 +27,23 @@ import torch
 import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 import time
 import logging
 from typing import List, Tuple, Dict
 from config_loader import Config, load_config
+
+# Set up Seaborn styling for publication-quality plots
+sns.set_style("whitegrid", {"grid.linewidth": 0.5, "grid.alpha": 0.5})
+sns.set_context("paper", font_scale=1.2, rc={"lines.linewidth": 2})
+plt.rcParams.update({
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman', 'DejaVu Serif'],
+    'mathtext.fontset': 'stix',
+    'axes.linewidth': 1.2,
+    'xtick.major.width': 1.2,
+    'ytick.major.width': 1.2
+})
 
 # ========== Core Implementation (unchanged) ==========
 class DifferentiableAmbiguity(nn.Module):
@@ -389,13 +402,17 @@ def plot_main_results(gradient_results, ga_results, config: Config):
     grad_hist = gradient_results[mid_idx]['history']
     ga_hist = ga_results[mid_idx]['history']
     
-    ax1.plot(grad_hist['time'], grad_hist['loss'], 'k-', label='GRAF', linewidth=2)
-    ax1.plot(ga_hist['time'], ga_hist['loss'], 'k--', label='Genetic Algorithm', linewidth=2)
-    ax1.set_xlabel('Time (seconds)')
-    ax1.set_ylabel('Combined Loss')
-    ax1.set_title(f'Convergence Comparison (λ={gradient_results[mid_idx]["lambda"]:.1f})')
-    ax1.legend()
-    ax1.grid(True, alpha=0.3)
+    # Use Seaborn color palette for better styling
+    colors = sns.color_palette("Greys", n_colors=6)
+    ax1.plot(grad_hist['time'], grad_hist['loss'], color=colors[5], linestyle='-', 
+             label='GRAF', linewidth=2.5)
+    ax1.plot(ga_hist['time'], ga_hist['loss'], color=colors[2], linestyle='-', 
+             label='GA', linewidth=2.5)
+    ax1.set_xlabel('Time (seconds)', fontweight='bold')
+    ax1.set_ylabel('Combined Loss', fontweight='bold')
+    ax1.set_title(f'Convergence Comparison (λ={gradient_results[mid_idx]["lambda"]:.1f})', 
+                  fontweight='bold', pad=20)
+    ax1.legend(frameon=True, shadow=True)
     
     # 2. Pareto frontier
     grad_psl = [r['psl'] for r in gradient_results]
@@ -403,13 +420,15 @@ def plot_main_results(gradient_results, ga_results, config: Config):
     ga_psl = [r['psl'] for r in ga_results]
     ga_lpi = [r['lpi'] * config.output.lpi_display_scale for r in ga_results]
     
-    ax2.plot(grad_psl, grad_lpi, 'k-o', label='GRAF', markersize=8, linewidth=2, fillstyle='full')
-    ax2.plot(ga_psl, ga_lpi, 'k-s', label='Genetic Algorithm', markersize=8, linewidth=2, fillstyle='none')
-    ax2.set_xlabel('Peak Sidelobe Level (PSL)')
-    ax2.set_ylabel(f'Spectral Variance (×{config.output.lpi_display_scale})')
-    ax2.set_title('Pareto Frontier: Detection vs. LPI')
-    ax2.legend()
-    ax2.grid(True, alpha=0.3)
+    ax2.plot(grad_psl, grad_lpi, color=colors[5], linestyle='-', marker='o', 
+             label='GRAF', markersize=8, linewidth=2.5, markerfacecolor=colors[5])
+    ax2.plot(ga_psl, ga_lpi, color=colors[2], linestyle='-', marker='s', 
+             label='GA', markersize=8, linewidth=2.5, 
+             markerfacecolor='white', markeredgecolor=colors[2], markeredgewidth=2)
+    ax2.set_xlabel('Peak Sidelobe Level (PSL)', fontweight='bold')
+    ax2.set_ylabel(f'Spectral Variance (×{config.output.lpi_display_scale})', fontweight='bold')
+    ax2.set_title('Pareto Frontier: Detection vs. LPI', fontweight='bold', pad=20)
+    ax2.legend(frameon=True, shadow=True)
     
     # Add lambda annotations
     for i, (psl, lpi, lam) in enumerate(zip(grad_psl, grad_lpi, 
@@ -419,9 +438,11 @@ def plot_main_results(gradient_results, ga_results, config: Config):
                         xytext=(5, 5), textcoords='offset points', 
                         fontsize=8, alpha=0.7)
     
+    # Apply Seaborn styling and save
+    sns.despine(fig=fig, left=False, bottom=False)
     plt.tight_layout()
     save_path = config.save_path(f'fig1_main_comparison.{config.output.plot_format}')
-    plt.savefig(save_path, dpi=config.output.plot_dpi, bbox_inches='tight')
+    plt.savefig(save_path, dpi=config.output.plot_dpi, bbox_inches='tight', facecolor='white')
     if not config.output.save_plots:
         plt.show()
     plt.close()
@@ -435,16 +456,22 @@ def plot_performance_summary(gradient_results, ga_results, config: Config):
     x = np.arange(len(lambda_vals))
     width = config.output.bar_width
     
+    # Define professional grayscale palette  
+    colors = sns.color_palette("Greys", n_colors=6)
+    graf_color, ga_color = colors[5], colors[2]  # Dark and medium gray
+    
     # Time comparison
     grad_times = [r['time'] for r in gradient_results]
     ga_times = [r['time'] for r in ga_results]
     
-    ax1.bar(x - width/2, grad_times, width, label='GRAF', color='0.2', alpha=1.0, edgecolor='black', linewidth=0.8)
-    ax1.bar(x + width/2, ga_times, width, label='GA', color='0.8', alpha=1.0, edgecolor='black', linewidth=0.8)
+    bars1 = ax1.bar(x - width/2, grad_times, width, label='GRAF', 
+                   color=graf_color, edgecolor='black', linewidth=0.8)
+    bars2 = ax1.bar(x + width/2, ga_times, width, label='GA', 
+                   color=ga_color, edgecolor='black', linewidth=0.8)
     
-    ax1.set_xlabel('λ (LPI weight)')
-    ax1.set_ylabel('Time to convergence (s)')
-    ax1.set_title('Computational Time Comparison')
+    ax1.set_xlabel('λ (LPI weight)', fontweight='bold')
+    ax1.set_ylabel('Time to convergence (s)', fontweight='bold')
+    ax1.set_title('Computational Time Comparison', fontweight='bold', pad=20)
     ax1.set_xticks(x)
     ax1.set_xticklabels([f'{l:.1f}' for l in lambda_vals])
     
@@ -453,26 +480,26 @@ def plot_performance_summary(gradient_results, ga_results, config: Config):
     for i, (ga_time, grad_time) in enumerate(zip(ga_times, grad_times)):
         speedup = ga_time / grad_time
         ax1.text(i + width/2, ga_time + max_ga_time * 0.05, f'{speedup:.1f}×', 
-                ha='center', va='bottom', fontweight='bold', fontsize=9)
+                ha='center', va='bottom', fontweight='bold', fontsize=10)
     
     # Set y-axis limit to accommodate annotations and position legend outside plot
     ax1.set_ylim(0, max_ga_time * 1.15)  # Space for annotations
-    ax1.legend(bbox_to_anchor=(1.02, 1), loc='upper left')  # Legend outside plot area
-    ax1.grid(True, alpha=0.3, axis='y')
+    ax1.legend(bbox_to_anchor=(1.02, 1), loc='upper left', frameon=True, shadow=True)
     
     # PSL comparison
     grad_psl_db = [20*np.log10(r['psl']) for r in gradient_results]
     ga_psl_db = [20*np.log10(r['psl']) for r in ga_results]
     
-    ax2.bar(x - width/2, grad_psl_db, width, label='GRAF', color='0.2', alpha=1.0, edgecolor='black', linewidth=0.8)
-    ax2.bar(x + width/2, ga_psl_db, width, label='GA', color='0.8', alpha=1.0, edgecolor='black', linewidth=0.8)
+    bars3 = ax2.bar(x - width/2, grad_psl_db, width, label='GRAF', 
+                   color=graf_color, edgecolor='black', linewidth=0.8)
+    bars4 = ax2.bar(x + width/2, ga_psl_db, width, label='GA', 
+                   color=ga_color, edgecolor='black', linewidth=0.8)
     
-    ax2.set_xlabel('λ (LPI weight)')
-    ax2.set_ylabel('PSL (dB)')
-    ax2.set_title('Peak Sidelobe Level Achieved')
+    ax2.set_xlabel('λ (LPI weight)', fontweight='bold')
+    ax2.set_ylabel('PSL (dB)', fontweight='bold')
+    ax2.set_title('Peak Sidelobe Level Achieved', fontweight='bold', pad=20)
     ax2.set_xticks(x)
     ax2.set_xticklabels([f'{l:.1f}' for l in lambda_vals])
-    ax2.grid(True, alpha=0.3, axis='y')
     
     # Add clean difference annotations at consistent height above all bars
     max_psl = max(max(grad_psl_db), max(ga_psl_db))
@@ -483,29 +510,31 @@ def plot_performance_summary(gradient_results, ga_results, config: Config):
     label_height = max_psl + psl_range * 0.08
     
     for i, (grad_psl, ga_psl) in enumerate(zip(grad_psl_db, ga_psl_db)):
-        diff = ga_psl - grad_psl
-        ax2.text(i, label_height, f'+{diff:.1f} dB', ha='center', va='bottom', 
+        diff = grad_psl - ga_psl  # GRAF improvement (should be negative = better)
+        ax2.text(i, label_height, f'{diff:.1f} dB', ha='center', va='bottom', 
                 fontweight='bold', fontsize=9, color='black',
                 bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.9, edgecolor='gray'))
     
     # Set y-axis limits to accommodate annotations and position legend outside
     ax2.set_ylim(min_psl - psl_range * 0.05, max_psl + psl_range * 0.20)
-    ax2.legend(bbox_to_anchor=(1.02, 1), loc='upper left')  # Legend outside plot area
+    ax2.legend(bbox_to_anchor=(1.02, 1), loc='upper left', frameon=True, shadow=True)
     
+    # Apply Seaborn styling and tight layout
+    sns.despine(fig=fig, left=False, bottom=False)
     plt.tight_layout()
     save_path = config.save_path(f'fig2_performance_summary.{config.output.plot_format}')
-    plt.savefig(save_path, dpi=config.output.plot_dpi, bbox_inches='tight')
+    plt.savefig(save_path, dpi=config.output.plot_dpi, bbox_inches='tight', facecolor='white')
     if not config.output.save_plots:
         plt.show()
     plt.close()
 
 def plot_waveform_analysis(gradient_results, config: Config):
-    """Spectral analysis of optimized waveforms"""
+    """Spectral analysis of GRAF-optimized waveforms"""
     fig_size = config.get_figure_size('spectrum_analysis')
     fig, axes = plt.subplots(1, 3, figsize=fig_size)
     
     examples = [0, len(gradient_results)//2, -1]
-    example_names = ['PSL Optimized', 'Balanced', 'LPI Optimized']
+    example_names = ['GRAF: PSL Optimized', 'GRAF: Balanced', 'GRAF: LPI Optimized']
     
     # Find maximum power for consistent scaling
     max_power = 0
@@ -524,11 +553,11 @@ def plot_waveform_analysis(gradient_results, config: Config):
         S = torch.fft.fft(s)
         power_spectrum = torch.abs(S)**2
         
-        ax.plot(power_spectrum.cpu().numpy(), 'k-', linewidth=1.5)
-        ax.set_xlabel('Frequency bin')
-        ax.set_ylabel('Power')
-        ax.set_title(f'{name} (λ={gradient_results[idx]["lambda"]:.1f})')
-        ax.grid(True, alpha=0.3)
+        ax.plot(power_spectrum.cpu().numpy(), color='black', linewidth=2)
+        ax.set_xlabel('Frequency bin', fontweight='bold')
+        ax.set_ylabel('Power', fontweight='bold')
+        ax.set_title(f'{name} (λ={gradient_results[idx]["lambda"]:.1f})', 
+                    fontweight='bold', pad=15)
         ax.set_ylim([0, max_power * 1.1])
         
         # Add statistics
@@ -538,9 +567,11 @@ def plot_waveform_analysis(gradient_results, config: Config):
                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.8),
                 fontsize=9)
     
+    # Apply Seaborn styling and save
+    sns.despine(fig=fig, left=False, bottom=False)
     plt.tight_layout()
     save_path = config.save_path(f'fig3_spectrum_comparison.{config.output.plot_format}')
-    plt.savefig(save_path, dpi=config.output.plot_dpi, bbox_inches='tight')
+    plt.savefig(save_path, dpi=config.output.plot_dpi, bbox_inches='tight', facecolor='white')
     if not config.output.save_plots:
         plt.show()
     plt.close()
