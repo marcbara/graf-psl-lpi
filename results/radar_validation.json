@@ -1,0 +1,41 @@
+{
+  "detection": {
+    "GA": {
+      "waveform_psl_db": -32.19864642949098,
+      "strong_peak_db": 4.3433309093538334e-12,
+      "weak_peak_db": -7.40740478873542,
+      "max_sidelobe_db": -15.601266340460745,
+      "peak_to_sidelobe_db": 15.601266340465088,
+      "weak_above_sidelobes_db": 8.193861551725325,
+      "false_alarm_rate": 0.6634147088553313
+    },
+    "1D Autocorr.": {
+      "waveform_psl_db": -25.81939843338609,
+      "strong_peak_db": 4.3433309093538334e-12,
+      "weak_peak_db": -7.43367629572853,
+      "max_sidelobe_db": -12.807610000271401,
+      "peak_to_sidelobe_db": 12.807610000275744,
+      "weak_above_sidelobes_db": 5.373933704542871,
+      "false_alarm_rate": 0.6532912671914725
+    },
+    "Full 2D (ours)": {
+      "waveform_psl_db": -34.790680782255706,
+      "strong_peak_db": 4.3433309093538334e-12,
+      "weak_peak_db": -7.406186842259698,
+      "max_sidelobe_db": -16.467297720512658,
+      "peak_to_sidelobe_db": 16.467297720517003,
+      "weak_above_sidelobes_db": 9.06111087825296,
+      "false_alarm_rate": 0.6725426532300058
+    }
+  },
+  "interference": {
+    "no_mask": {
+      "psl_db": -34.790680782255706,
+      "notch_energy_pct": 7.680622577667236
+    },
+    "with_mask": {
+      "psl_db": -34.63154447515093,
+      "notch_energy_pct": 0.0016554335597902536
+    }
+  }
+}

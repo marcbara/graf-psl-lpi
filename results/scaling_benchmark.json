@@ -1,0 +1,45 @@
+{
+  "results": {
+    "64": {
+      "time_mean": 0.95,
+      "time_std": 0.66,
+      "psl_mean": 0.067014,
+      "psl_std": 0.002809,
+      "psl_db_mean": -23.5,
+      "max_iter": 256
+    },
+    "128": {
+      "time_mean": 1.23,
+      "time_std": 0.01,
+      "psl_mean": 0.034202,
+      "psl_std": 0.000908,
+      "psl_db_mean": -29.3,
+      "max_iter": 512
+    },
+    "256": {
+      "time_mean": 2.51,
+      "time_std": 0.06,
+      "psl_mean": 0.019033,
+      "psl_std": 0.000215,
+      "psl_db_mean": -34.4,
+      "max_iter": 1024
+    },
+    "512": {
+      "time_mean": 4.96,
+      "time_std": 0.05,
+      "psl_mean": 0.010646,
+      "psl_std": 0.000119,
+      "psl_db_mean": -39.5,
+      "max_iter": 2000
+    }
+  },
+  "N_values": [
+    64,
+    128,
+    256,
+    512
+  ],
+  "lambda": 0.5,
+  "num_seeds": 5,
+  "gpu": "Tesla T4"
+}
